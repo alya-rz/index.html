@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operasi Selamatkan Rumah Opah</title>
+<style>
+:root{--green:#2f855a;--cream:#fff8e8;--brown:#70452b;--pink:#ffe4e6}
+*{box-sizing:border-box}body{margin:0;padding:22px;font-family:Arial,sans-serif;background:linear-gradient(135deg,#e5f5df,#fff4d6);color:#24352b}
+main{max-width:720px;margin:auto}.card{background:#fff;border:3px solid #e7d5a8;border-radius:22px;padding:22px;margin:14px 0;box-shadow:0 5px 15px #0001}
+h1,h2{text-align:center;color:#286344}.hero{text-align:center;font-size:42px}.sub{text-align:center;line-height:1.6}
+button{font-size:16px;cursor:pointer;border:0;border-radius:13px;padding:14px 18px;margin-top:10px}
+.primary{background:var(--green);color:white;font-weight:bold}.option{display:block;width:100%;text-align:left;background:#f5f7ee;border:2px solid #d9e5d2;margin:9px 0;color:#24352b}
+.option:hover{background:#e8f4e4}.option:disabled{cursor:default;opacity:1}.correct{background:#d9f5df!important;border-color:#26965b!important}.wrong{background:#ffe0dc!important;border-color:#d45b4c!important}
+.row{display:flex;justify-content:space-between;gap:10px;font-weight:bold;font-size:14px}.track{height:10px;background:#e7eadf;border-radius:20px;overflow:hidden;margin:12px 0}.bar{height:100%;width:0;background:#35a66a;transition:width .2s}
+#feedback{padding:13px;background:#fff5d8;border-radius:12px;line-height:1.5;margin-top:12px}
+.hidden{display:none}.center{text-align:center}.badge{font-size:48px}
+@media(max-width:480px){body{padding:12px}.card{padding:17px}h1{font-size:25px}}
+</style>
+</head>
+<body>
+<main>
+<section class="card">
+ <div class="hero">🏡 🔑 🌼</div>
+ <h1>Operasi Selamatkan Rumah Opah!</h1>
+ <p class="sub">Opah kehilangan ayat-ayat kata kerja pasifnya. Bantu Upin dan Ipin menjawab 8 cabaran untuk mengumpulkan kunci ajaib!</p>
+ <p class="center">⭐ 8 cabaran &nbsp; · &nbsp; 🔑 Kumpul kunci &nbsp; · &nbsp; 🏆 Jadi Wira Bahasa</p>
+ <div class="center"><button class="primary" id="start">Mula Misi</button></div>
+</section>
+<section class="card hidden" id="game">
+ <div class="row"><span id="progress">Cabaran 1 daripada 8</span><span id="score">⭐ 0 markah · 🔑 0</span></div>
+ <div class="track"><div class="bar" id="bar"></div></div>
+ <p class="center" style="font-size:32px">👦🏻👦🏻</p>
+ <p id="type" style="font-weight:bold;color:#647b61"></p>
+ <h2 id="question" style="text-align:left;color:#24352b;font-size:21px"></h2>
+ <div id="options"></div>
+ <div id="feedback" class="hidden" aria-live="polite"></div>
+ <div class="center"><button class="primary hidden" id="next">Cabaran seterusnya →</button></div>
+</section>
+<section class="card hidden center" id="result" aria-live="polite"></section>
+</main>
+<script>
+const questions=[
+{t:"PILIH AYAT PASIF",q:"Upin membaca buku cerita. Apakah ayat pasif yang betul?",o:["Buku cerita dibaca oleh Upin.","Buku cerita membaca Upin.","Upin dibaca oleh buku cerita.","Buku cerita sedang membaca."],a:0,e:"Objek “buku cerita” menjadi subjek ayat pasif dan “membaca” berubah menjadi “dibaca”."},
+{t:"LENGKAPKAN AYAT",q:"Bola itu ______ oleh Ipin di padang.",o:["menendang","ditendang","tertendang oleh","penendang"],a:1,e:"“Ditendang” ialah kata kerja pasif yang sesuai kerana bola menerima perbuatan."},
+{t:"KENAL PASTI KATA KERJA",q:"Pilih kata kerja pasif dalam ayat: “Pokok bunga disiram oleh Mei Mei.”",o:["pokok","bunga","disiram","Mei Mei"],a:2,e:"“Disiram” ialah kata kerja pasif yang menerima imbuhan di-."},
+{t:"TUKAR AYAT",q:"Tukarkan ayat “Mail menjual ayam” kepada ayat pasif.",o:["Ayam menjual Mail.","Mail dijual oleh ayam.","Ayam dijual oleh Mail.","Ayam sedang menjual Mail."],a:2,e:"“Ayam” menjadi subjek dan “menjual” berubah menjadi “dijual”."},
+{t:"PILIH IMBUHAN",q:"Apakah imbuhan awalan dalam kata kerja pasif “ditulis”?",o:["meN-","ber-","di-","ter-"],a:2,e:"Kata kerja “ditulis” menggunakan imbuhan awalan di-."},
+{t:"BETUL ATAU SALAH",q:"Ayat “Nasi dimakan oleh Upin” menggunakan kata kerja pasif. Pilih jawapan yang tepat.",o:["Betul","Salah","Ayat aktif","Ayat perintah"],a:0,e:"“Dimakan” ialah kata kerja pasif. Nasi menerima perbuatan makan."},
+{t:"BAIKI AYAT",q:"Pilih pembetulan yang betul bagi ayat “Kuih memasak oleh Kak Ros.”",o:["Kuih dimasak oleh Kak Ros.","Kak Ros dimasak oleh kuih.","Kuih memasak Kak Ros.","Kak Ros memasak oleh kuih."],a:0,e:"Ayat pasif yang betul ialah “Kuih dimasak oleh Kak Ros”."},
+{t:"CABARAN TERAKHIR",q:"Pilih ayat pasif yang betul bagi “Murid-murid membersihkan kelas.”",o:["Kelas membersihkan murid-murid.","Kelas dibersihkan oleh murid-murid.","Murid-murid dibersihkan oleh kelas.","Kelas membersih oleh murid-murid."],a:1,e:"“Kelas” menjadi subjek ayat pasif dan “membersihkan” berubah menjadi “dibersihkan”."}
+];
+let n=0,score=0,keys=0,locked=false;
+const $=id=>document.getElementById(id);
+function begin(){n=0;score=0;keys=0;$("result").classList.add("hidden");$("game").classList.remove("hidden");$("start").classList.add("hidden");show()}
+function show(){locked=false;let d=questions[n];$("progress").textContent=`Cabaran ${n+1} daripada 8`;$("score").textContent=`⭐ ${score} markah · 🔑 ${keys}`;$("bar").style.width=(n/8*100)+"%";$("type").textContent=d.t;$("question").textContent=d.q;$("feedback").classList.add("hidden");$("next").classList.add("hidden");$("next").textContent=n===7?"Lihat keputusan 🏆":"Cabaran seterusnya →";$("options").innerHTML="";d.o.forEach((v,i)=>{let b=document.createElement("button");b.className="option";b.textContent=String.fromCharCode(65+i)+". "+v;b.onclick=()=>answer(i);$("options").appendChild(b)})}
+function answer(i){if(locked)return;locked=true;let d=questions[n],ok=i===d.a;if(ok){score+=10;keys++}Array.from($("options").children).forEach((b,j)=>{b.disabled=true;if(j===d.a)b.classList.add("correct");else if(j===i)b.classList.add("wrong")});$("score").textContent=`⭐ ${score} markah · 🔑 ${keys}`;$("feedback").innerHTML=`<strong>${ok?"🎉 Tepat sekali! +10 markah":"Belum tepat. Semak jawapan yang ditandakan."}</strong><br>${d.e}`;$("feedback").classList.remove("hidden");$("next").classList.remove("hidden")}
+function finish(){$("game").classList.add("hidden");$("result").classList.remove("hidden");$("bar").style.width="100%";$("result").innerHTML=`<div class="badge">${keys>=6?"🏆🎉🔑":"🌱💪"}</div><h2>${keys>=6?"Syabas, Wira Bahasa!":"Teruskan Berlatih!"}</h2><p>${keys>=6?"Kamu berjaya membantu Upin dan Ipin menyelamatkan ayat-ayat Opah!":"Kamu telah mencuba semua cabaran. Semak nota dan cuba lagi."}</p><h2>${score} / 80 markah</h2><p>${keys} daripada 8 jawapan betul · ${keys} kunci diperoleh</p><button class="primary" id="again">Main semula</button>`;$("again").onclick=begin}
+$("start").onclick=begin;$("next").onclick=()=>{if(n<7){n++;show()}else finish()};
+</script>
+</body>
+</html>
